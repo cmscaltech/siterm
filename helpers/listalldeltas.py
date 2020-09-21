@@ -17,7 +17,9 @@ def getdeltaAll(sitename):
     dbI = getDBConn()
     dbobj = getVal(dbI, sitename=sitename)
     for delta in dbobj.get('deltas'):
+        print delta['addition']
         delta['addition'] = evaldict(delta['addition'])
+        print delta['reduction']
         delta['reduction'] = evaldict(delta['reduction'])
         print '='*80
         print 'Delta UID  :  ', delta['uid']
