@@ -18,6 +18,7 @@ Email 			: justas.balcas (at) cern.ch
 @Copyright		: Copyright (C) 2016 California Institute of Technology
 Date			: 2018/11/26
 """
+import uuid
 from DTNRMLibs.MainUtilities import evaldict
 from DTNRMLibs.MainUtilities import getUTCnow
 
@@ -57,6 +58,18 @@ class StateMachine(object):
                                  'state': newState,
                                  'insertdate': tNow}])
 
+    def _stateChangerConnection(self, dbObj, newState, **kwargs):
+        """ Delta State change """
+        tNow = getUTCnow()
+        self.logger.info('Changing delta %s to %s' % (kwargs['uid'], newState))
+        dbObj.update('connections', [{'uid': kwargs['uid'],
+                                      'state': newState,
+                                      'updatedate': tNow}])
+        dbObj.insert('connectionstates', [{'connectionid': kwargs['uid'],
+                                           'state': newState,
+                                           'insertdate': tNow}])
+
+
     def _modelstatechanger(self, dbObj, newState, **kwargs):
         """ Model State change """
         tNow = getUTCnow()
@@ -82,6 +95,30 @@ class StateMachine(object):
                                      'id': hid}])
         dbObj.insert('hoststateshistory', [kwargs])
 
+    def _newConnections(self, dbObj, delta, state):
+        for key in ['addition', 'reduction']:
+            if isintance(delta['ParsedDelta'][key], list):
+                for connDict in delta['ParsedDelta'][key]:
+                    dbOut = { uid: str(uuid.uuid4())
+                             'duid': delta['ID'],
+                             'insertdate': int(delta['InsertTime']),
+                             'updatedate': int(delta['UpdateTime']),
+                             'state': str(state),
+                             'deltat': str(delta['Type']),
+                             'content': str(delta['Content']),
+                             'modelid': str(delta['modelId']),
+                             'reduction': '',
+                             'addition': '',
+                             'reductionid': '',
+                             'modadd': str(delta['modadd']),
+                             'connectionid': '',
+                             'error': '' if 'Error' not in delta.keys() else str(delta['Error'])}
+                    dbOut[key] = str(connDict)
+                    dbOut['connectionid'] = connDict['connectionID']
+                    dbObj.insert('connections', [dbOut])
+                    self._stateChangerConnection(dbObj, delta['State'], **dbOut)
+
+
     def _newdelta(self, dbObj, delta, state):
         """ Add new delta to db """
         dbOut = {'uid': delta['ID'],
@@ -100,6 +137,7 @@ class StateMachine(object):
         dbObj.insert('deltas', [dbOut])
         dbOut['state'] = delta['State']
         self._stateChangerDelta(dbObj, delta['State'], **dbOut)
+        self._newConnections(dbObj, delta, state)
 
     def _newhoststate(self, dbObj, **kwargs):
         """ Private to add new host states. """

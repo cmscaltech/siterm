@@ -271,16 +271,15 @@ class PolicyService(object):
         """ Accept delta """
         jOut = getAllHosts(sitename, self.logger)
         fileContent = self.siteDB.getFileContentAsJson(deltapath)
-        os.unlink(deltapath)  # File is not needed anymore.
+        #os.unlink(deltapath)  # File is not needed anymore.
         toDict = dict(fileContent)
         toDict["State"] = "accepting"
         outputDict = {'addition': '', 'reduction': ''}
         try:
-            self.logger.info(toDict["Content"])
-            self.logger.info(type(toDict["Content"]))
             for key in ['reduction', 'addition']:
                 if key in toDict["Content"] and toDict["Content"][key]:
-                    self.logger.info('Got Content %s for key %s', toDict["Content"][key], key)
+                    self.logger.debug('===================== Got Content for key %s =========================', key)
+                    self.logger.info('%s', toDict["Content"][key])
                     tmpFile = tempfile.NamedTemporaryFile(delete=False)
                     try:
                         tmpFile.write(toDict["Content"][key])
@@ -298,7 +297,7 @@ class PolicyService(object):
             toDict["State"] = "failed"
             toDict["Error"] = outputDict
             toDict['ParsedDelta'] = {'addition': '', 'reduction': ''}
-            self.stateMachine.failed(dbobj, toDict)
+            #self.stateMachine.failed(dbobj, toDict)
         else:
             toDict["State"] = "accepted"
             connID = None
@@ -320,7 +319,7 @@ class PolicyService(object):
                             toDict["ReductionID"] = reductionIDMap
                 toDict['ConnID'] = str(connID)
                 toDict['modadd'] = 'idle'
-                self.stateMachine.accepted(dbobj, toDict)
+                #self.stateMachine.accepted(dbobj, toDict)
             # =================================
         return toDict
 
@@ -352,7 +351,11 @@ def execute(config=None, logger=None, args=None):
     policer = PolicyService(config, logger)
     if args:
         # This is only for debugging purposes.
-        print policer.parseDeltaRequest(args[1], {args[2]: []}, args[3])
+        import pprint
+        print '-'*100
+        out = policer.acceptDelta(args[1], args[3])
+        print '-'*100
+        pprint.pprint(out)
     else:
         policer.startwork()
 

@@ -43,7 +43,7 @@ class ProvisioningService(object):
         """ Push Internal action and return dict """
         newState = ""
         restOut = {}
-        restOut = getDataFromSiteFE({}, url, "/sitefe/v1/deltas/%s/internalaction/%s/%s" % (deltaID, hostname, state))
+        restOut = getDataFromSiteFE({}, url, "/sitefe/v1/connections/%s/internalaction/%s/%s" % (deltaID, hostname, state))
         if restOut[1] >= 400:
             msg = "Failed to set new state in database for %s delta and %s hostname. Error %s " \
                   % (deltaID, hostname, restOut)

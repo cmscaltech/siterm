@@ -473,7 +473,6 @@ def generateHash(inText):
     del inText
     return str(uuid.uuid1())
 
-
 def getCustomOutMsg(errMsg=None, errCode=None, msg=None, exitCode=None):
     """ Create custom return dictionary """
     newOut = {}

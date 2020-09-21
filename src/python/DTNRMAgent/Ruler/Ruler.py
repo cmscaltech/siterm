@@ -75,11 +75,11 @@ class Ruler(object):
 
     def getDeltaInfo(self, deltaid):
         """ Get Delta information """
-        return self.getData("/sitefe/v1/deltas/%s?oldview=true" % deltaid)
+        return self.getData("/sitefe/v1/connections/%s?oldview=true" % deltaid)
 
     def setHostState(self, state, deltaid):
         """ Push Internal action and return dict """
-        restOut = getDataFromSiteFE({}, self.fullURL, "/sitefe/v1/deltas/%s/internalaction/%s/%s" %
+        restOut = getDataFromSiteFE({}, self.fullURL, "/sitefe/v1/connections/%s/internalaction/%s/%s" %
                                     (deltaid, self.hostname, state))
         if restOut[1] >= 400:
             self.logger.info("Failed to set new state in database for %s delta \

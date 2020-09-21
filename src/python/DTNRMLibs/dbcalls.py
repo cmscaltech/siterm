@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-DB Backend SQL Calls to databses.
+DB Backend SQL Calls to database.
 
 Copyright 2019 California Institute of Technology
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +18,7 @@ Email 			: justas.balcas (at) cern.ch
 @Copyright		: Copyright (C) 2019 California Institute of Technology
 Date			: 2019/05/01
 """
-create_models = "CREATE TABLE models(id INTEGER PRIMARY KEY AUTOINCREMENT, uid text NOT NULL, insertdate INTEGER NOT NULL, fileloc text NOT NULL)"
+create_models = "CREATE TABLE models(id INTEGER PRIMARY KEY AUTOINCREMENT, uid text NOT NULL, insertdate INTEGER NOT NULL, fileloc text NOT NULL, content text NOT NULL)"
 create_deltas = """CREATE TABLE deltas(id INTEGER PRIMARY KEY AUTOINCREMENT,
                                        uid text NOT NULL,
                                        insertdate INTEGER NOT NULL,
@@ -32,25 +32,46 @@ create_deltas = """CREATE TABLE deltas(id INTEGER PRIMARY KEY AUTOINCREMENT,
                                        reductionid text,
                                        modadd text,
                                        connectionid text NOT NULL)"""
+create_connections =  """ CREATE TABLE connections(id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                       uid text NOT NULL,
+                                       duid text NOT NULL,
+                                       insertdate INTEGER NOT NULL,
+                                       updatedate INTEGER NOT NULL,
+                                       state text NOT NULL,
+                                       deltat text NOT NULL,
+                                       content text NOT NULL,
+                                       modelid text NOT NULL,
+                                       reduction text NOT NULL,
+                                       addition text NOT NULL,
+                                       reductionid text,
+                                       modadd text,
+                                       connectionid text NOT NULL)"""
+
 create_states = "CREATE TABLE states(id INTEGER PRIMARY KEY AUTOINCREMENT, deltaid text NOT NULL, state text NOT NULL, insertdate INTEGER NOT NULL)"
+create_connectionstates = "CREATE TABLE connectionstates(id INTEGER PRIMARY KEY AUTOINCREMENT, connectionid text NOT NULL, state text NOT NULL, insertdate INTEGER NOT NULL)"
 create_hoststates = "CREATE TABLE hoststates(id INTEGER PRIMARY KEY AUTOINCREMENT, deltaid text NOT NULL, state text NOT NULL, insertdate INTEGER NOT NULL, updatedate INTEGER NOT NULL, hostname text NOT NULL)"
 create_hoststateshistory = "CREATE TABLE hoststateshistory(id INTEGER PRIMARY KEY AUTOINCREMENT, deltaid text NOT NULL, state text NOT NULL, insertdate INTEGER NOT NULL, hostname text NOT NULL)"
 create_parsed = "CREATE TABLE parsed(id INTEGER PRIMARY KEY AUTOINCREMENT, deltaid text NOT NULL, vals text NOT NULL, insertdate INTEGER NOT NULL)"
 create_hosts = "CREATE TABLE hosts(id INTEGER PRIMARY KEY AUTOINCREMENT, ip text NOT NULL, hostname text NOT NULL, insertdate INTEGER NOT NULL, updatedate INTEGER NOT NULL, hostinfo text NOT NULL)"
 
 
-insert_models = "INSERT INTO models(uid, insertdate, fileloc) VALUES(:uid, :insertdate, :fileloc)"
+insert_models = "INSERT INTO models(uid, insertdate, fileloc) VALUES(:uid, :insertdate, :fileloc, :content)"
 insert_deltas = """INSERT INTO deltas(uid, insertdate, updatedate, state, deltat, content, modelid, reduction, addition, reductionid, modadd, connectionid)
                    VALUES(:uid, :insertdate, :updatedate, :state, :deltat, :content, :modelid, :reduction, :addition, :reductionid, :modadd, :connectionid)"""
+insert_connections = """INSERT INTO connections(uid, duid, insertdate, updatedate, state, deltat, content, modelid, reduction, addition, reductionid, modadd, connectionid)
+                        VALUES(:uid, :duid, :insertdate, :updatedate, :state, :deltat, :content, :modelid, :reduction, :addition, :reductionid, :modadd, :connectionid)"""
 insert_states = "INSERT INTO states(deltaid, state, insertdate) VALUES(:deltaid, :state, :insertdate)"
+insert_connectionstates = "INSERT INTO connectionstates(connectionid, state, insertdate) VALUES(:connectionid, :state, :insertdate)"
 insert_hoststates = "INSERT INTO hoststates(deltaid, state, insertdate, updatedate, hostname) VALUES(:deltaid, :state, :insertdate, :updatedate, :hostname)"
 insert_hoststateshistory = "INSERT INTO hoststateshistory(deltaid, state, insertdate, hostname) VALUES(:deltaid, :state, :insertdate, :hostname)"
 insert_parsed = "INSERT INTO parsed(deltaid, vals, insertdate) VALUES(:deltaid, :vals, :insertdate)"
 insert_hosts = "INSERT INTO hosts(ip, hostname, insertdate, updatedate, hostinfo) VALUES(:ip, :hostname, :insertdate, :updatedate, :hostinfo)"
 
-get_models = "SELECT id, uid, insertdate, fileloc FROM models"
+get_models = "SELECT id, uid, insertdate, fileloc, content FROM models"
 get_deltas = "SELECT id, uid, insertdate, updatedate, state, deltat, content, modelid, reduction, addition, reductionid, modadd, connectionid FROM deltas"
+get_connections = "SELECT id, uid, duid, insertdate, updatedate, state, deltat, content, modelid, reduction, addition, reductionid, modadd, connectionid FROM connections"
 get_states = "SELECT id, deltaid, state, insertdate FROM states"
+get_connectionstates = "SELECT id, connectionid, state, insertdate FROM connectionstates"
 get_hoststates = "SELECT id, deltaid, state, insertdate, updatedate, hostname FROM hoststates"
 get_hoststateshistory = "SELECT id, deltaid, state, insertdate, hostname FROM hoststateshistory"
 get_parsed = "SELECT id, deltaid, vals, insertdate FROM parsed"
@@ -63,6 +84,8 @@ update_hoststates = "UPDATE hoststates SET state = :state, updatedate = :updated
 update_hosts = "UPDATE hosts SET ip = :ip, hostname = :hostname, updatedate = :updatedate, hostinfo = :hostinfo WHERE id = :id"
 
 delete_models = "DELETE FROM models"
+delete_connections = "DELETE FROM connections"
 delete_states = "DELETE FROM states"
+deleteconnectionstates = "DELETE FROM connectionstates"
 delete_hoststates = "DELETE FROM hoststates"
 delete_hosts = "DELETE FROM hosts"

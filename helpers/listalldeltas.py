@@ -31,6 +31,7 @@ def getdeltaAll(sitename):
         print 'Delta Model:  ', delta['modelid']
         print 'Delta connID: ', delta['connectionid']
         print 'Delta Deltatype: ', delta['deltat']
+        #print 'Delta Content:', delta['content']
         print '-'*20
         print 'Delta times'
         for deltatimes in dbobj.get('states', search=[['deltaid', delta['uid']]]):
